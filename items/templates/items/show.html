@@ -22,7 +22,61 @@
     {% if post.user == user %}
         <a href="{% url 'items:delete' post.pk %}"> 삭제하기 </a>
     {% endif %}
+
+    <span href="#" class="like" name ="{{post.id}}" value="Like"> 
+        {% if user in post.like_user_set.all %}
+            <div class="alt-service-icon">
+                <i class="fas fa-heart" id ="like-icon" style="color:red;"></i>
+            </div> 
+        {% else %}
+            <div class="alt-service-icon">
+                <i class="far fa-heart" id ="like-icon" style="color:red;"></i> 
+            </div>
+        {% endif %}
+            <span id="count-{{ post.id }}" class="alt-services-title font-alt">
+            좋아요 
+            {% if post.like_count == 0 %} 
+                0개 
+            {% else %}
+                {{ post.like_count }}개
+            {% endif %}
+            </span>
+    </span>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script>
+    //like ajax func
+    $(".like").click(function(){
+        var pk=$(this).attr('name')
+        $.ajax({
+            type: "POST",
+            url: "{% url 'items:like_toggle' post.pk %}",
+            data: {'pk':pk,'csrfmiddlewaretoken':'{{csrf_token}}'},
+            dataType:"json",
+            success: function(response){
+                if(response.like_count==null){
+                    alert("로그인이 필요합니다");
+                }
+                else{
+                    if(response.result=="like"){
+                        $('#like-icon').removeClass();
+                        $('#like-icon').addClass('fas fa-heart');
+                    }
+                    else{
+                        $('#like-icon').removeClass();
+                        $('#like-icon').addClass('far fa-heart');
+                    }
+                    $('#count-{{post.id}}').html('좋아요'+response.like_count+'개');
+                }
+            },
+            error: function(request, status, error){
+                alert("로그인이 필요합니다.")
+                window.location.replace("/accounts/login/")
+            },
+        });
+    })
+</script>
     
 
 {% endblock %}
