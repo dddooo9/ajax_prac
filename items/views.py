@@ -3,6 +3,7 @@ from .models import *
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse 
+from django.template.loader import render_to_string
 import json
 
 
@@ -25,8 +26,14 @@ def create(request):
 def show(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     post.view_count = post.view_count+1
+    user = request.user
     post.save()
-    return render(request, 'items/show.html', {'post':post})
+    context = {
+    'post':post,
+    'user':user,
+    'comments': post.comments.all().order_by('-created_at')
+    }
+    return render(request, 'items/show.html', context)
 
 
 #삭제하기
@@ -68,3 +75,16 @@ def dislike_toggle(request,post_id):
         "result":result
     }
     return HttpResponse(json.dumps(context),content_type="application/json")
+
+@login_required
+@require_POST
+def create_comment(request, post_id):
+    user = request.user
+    post = get_object_or_404(Post, pk=post_id)
+    content = request.POST.get('content')
+    comment = Comment.objects.create(writer=user, post=post, content=content)
+    rendered = render_to_string('comments/_comment.html', { 'comment': comment, 'user': request.user})
+    context = {
+		'comment': rendered
+    }
+    return HttpResponse(json.dumps(context), content_type="application/json")

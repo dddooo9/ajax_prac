@@ -1,0 +1,9 @@
+<li class="list-group-item" id="comment-{{ comment.pk }}">
+    <p>
+        <b>{{ comment.writer.username }}</b>
+        {% if user == comment.writer %}
+            <a href="#" class="right comment-delete-button" id="comment-delete-{{ comment.pk }}" data-comment-id="{{ comment.pk }}">삭제</a>
+        {% endif %}
+    </p>
+    <p>{{ comment.content }}</p>
+</li>

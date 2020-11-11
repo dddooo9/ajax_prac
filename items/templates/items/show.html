@@ -61,6 +61,21 @@
             {% endif %}
             </span>
     </span>
+
+    <form action="#" method="POST" style="margin-top: 50px;" class="create-comment-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <textarea class="form-control" name="content" id="comment-input-{{ post.pk }}" placeholder="댓글 작성..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary comment-submit-button" data-post-id="{{ post.pk }}">작성</button>
+    </form><br>
+    {% if comments %}
+        <ul class="list-group" id="comments-list-{{ post.pk }}" style="margin-top: 40px;">
+            {% for comment in comments %}
+                {% include 'comments/_comment.html' with comment=comment user=user %}
+            {% endfor %}
+        </ul>
+    {% endif %}
 </div>
 
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -127,6 +142,33 @@
             },
         });
     })
+
+    //comment ajax
+    $('.comment-submit-button').click(function(e){
+        e.preventDefault();
+        const postId = $(this).data('post-id');
+        const commentMessage = $(`#comment-input-${postId}`).val();
+        console.log(commentMessage)
+        if (commentMessage === '') {
+            alert('댓글 내용을 입력해주세요.');
+        } else {
+            $.ajax({
+                url: "{% url 'items:create_comment' post.pk %}",
+                type: "POST",
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'content': commentMessage
+                },
+                success: function(response) {
+                    $(`#comments-list-${postId}`).prepend(response.comment);
+                    $(`#comment-input-${postId}`).val('');
+                },
+                error: function(response) {
+                    alert('오류가 발생했습니다.');
+                }
+            });
+        }
+    });
 </script>
     
 
