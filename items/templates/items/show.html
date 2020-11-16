@@ -143,7 +143,7 @@
         });
     })
 
-    //comment ajax
+    //comment add ajax
     $('.comment-submit-button').click(function(e){
         e.preventDefault();
         const postId = $(this).data('post-id');
@@ -169,7 +169,29 @@
             });
         }
     });
-</script>
-    
 
+     //comment delete ajax
+     $('.comment-delete-button').click(function(e){
+        e.preventDefault();
+        const commentId = $(this).data('comment-id');
+        const commentMessage = $(`#comment-delete-${commentId}`).val();
+        console.log(commentMessage)
+        var delete_warning=confirm('삭제하시겠습니까?');
+        if(delete_warning==true){
+            $.ajax({
+                url: `../../delete_comment/${commentId}/`,
+                type: "POST",
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                success: function(response) {
+                    $(`#comment-${commentId}`).remove();
+                },
+                error: function(response) {
+                    alert('오류가 발생했습니다.');
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

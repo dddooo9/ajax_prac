@@ -88,3 +88,13 @@ def create_comment(request, post_id):
 		'comment': rendered
     }
     return HttpResponse(json.dumps(context), content_type="application/json")
+
+
+def delete_comment(request, comment_id):
+    user = request.user
+    comment=get_object_or_404(Comment,pk=comment_id)
+    rendered = render_to_string('comments/_comment.html', { 'comment': comment, 'user': request.user})
+    context={
+        'comment': rendered
+    }
+    return HttpResponse(json.dumps(context), content_type="application/json")
